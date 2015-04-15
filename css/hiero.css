@@ -1,0 +1,12 @@
+/** 
+ * Default CSS for displaying hieroglyphs.
+ **/
+
+.mdc-quadrant {display: inline-block;}
+.mdc-hbox {display: block;}
+.mdc-subQuadrant {display: inline-block;}
+.mdc-text {display: inline; line-height:0.5; padding: 0.5pt;}
+.mdc-text * {padding: 0.025em;}
+.mdc-space { height: 1em; width: 1em; display: inline-block;}
+.mdc-halfspace {width: 0.5em; display: inline-block;}
+.mdc-shaded {background-color: lightgray; }

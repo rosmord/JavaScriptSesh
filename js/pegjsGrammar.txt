@@ -1,0 +1,33 @@
+{
+ function createList(head, subList) {
+        var l= [];
+        l.push(head);
+        for (var i in subList) {
+            l.push(subList[i][1]);
+        }
+        return l;
+     }
+}
+
+start
+  = text
+
+text=
+    h:quadrant t:("-" quadrant)* {return {type: "text", content: createList(h,t)}} / {return {type: "text", content: []}} 
+
+quadrant = h1:hbox h2:(":" hbox)* {return {type: "quadrant", content: createList(h1,h2)}}
+
+hbox
+  = u1:unitBox u2:("*" unitBox)* {return {type: "hbox", content: createList(u1,u2)}}
+
+unitBox= sign /
+  "(" t:text ")" {return {type: "subQuadrant", content: t.content}}
+
+
+sign "sign"= 
+  glyphCode:$([a-zA-Z0-9@]+)
+         {return {type: "glyphCode", value: glyphCode}}
+  / symbol: $("[["/"]]"/".."/"."/"//") {return {type: "symbol", value: symbol}}
+
+
+

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test (bug with firefox)</title>
+    <link rel="stylesheet" type="text/css" href="../css/hiero.css" />
+    <style>
+      .mdc-hbox {border: solid 1px red;}
+    </style>
+    <script src="../js/jquery-1.11.2.min.js"></script>
+  </head>
+  <body>
+
+<p>
+    With firefox, <em>some</em> glyphs don't display on the same line. See those below the <img src="../images/glyphs/N35.svg">.
+    <span><span class="mdc-text">
+      <span class="mdc-quadrant">
+	<span class="mdc-hbox"><img src="../images/glyphs/N35.svg"></span>
+	<span class="mdc-hbox"><span class="mdc-subQuadrant">
+	    <span class="mdc-quadrant">
+	      <span class="mdc-hbox">
+		<img src="../images/glyphs/Aa1.svg"></span>
+	      <span class="mdc-hbox">
+		<img src="../images/glyphs/X1.svg">
+	      </span>
+	    </span>
+	  </span>
+	  <img src="../images/glyphs/U30.svg">
+	</span>
+      </span>
+      </span>
+    </span>
+</p>
+
+<p>
+Simplified :
+
+    <span class="mdc-text">
+      <span class="mdc-quadrant">
+	<span class="mdc-hbox"><img src="../images/glyphs/N35.svg"></span>
+	<span class="mdc-hbox">
+	  <img src="../images/glyphs/Aa1.svg">
+	  <img src="../images/glyphs/X1.svg">
+	</span>
+      </span>
+    </span>
+
+<p>
+With png pictures instead of svg, it seems to work...
+Is it a bug for us of for firefox ? is it a feature of inline-box ? Any fix ?
+
+    <span class="mdc-text">
+      <span class="mdc-quadrant">
+	<span class="mdc-hbox"><img src="N35.png"></span>
+	<span class="mdc-hbox">
+	  <img src="Aa1.png">
+	  <img src="X1.png">
+	</span>
+      </span>
+    </span>
+
+<p>
+  It seems that it doesn't depend on the size of the content:
+    <span class="mdc-text">
+      <span class="mdc-quadrant">
+	<span class="mdc-hbox"><img src="N35.png"></span>
+	<span class="mdc-hbox">
+	  <img src="Aa1.png">
+	  <img src="X1.png">
+	  <img src="Aa1.png">
+	  <img src="X1.png">
+	  <img src="Aa1.png">
+	  <img src="X1.png">
+	</span>
+      </span>
+    weird.
+</p>
+
+
+      <p>
+Playing with width:
+
+    <span class="mdc-text">
+      <span class="mdc-quadrant">
+	<span class="mdc-hbox" style="min-width: 34px;"><img src="../images/glyphs/N35.svg" alt=""> <img src="../images/glyphs/Aa1.svg" alt=""></span>
+	<span class="mdc-hbox">
+	  <img src="../images/glyphs/Aa1.svg" alt="">
+	  <img src="../images/glyphs/Aa1.svg" alt="">
+	</span>
+      </span>
+      </p>      
+      
+      <div id="info"></div>
+      <script>
+	$("img").hover(
+	function() {
+	 $("#info").text("pict size "+ this.naturalWidth+ ", " + this.naturalHeight);
+	}
+	);
+      </script>
+
+      
+  </body>
+</html>
