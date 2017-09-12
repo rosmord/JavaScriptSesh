@@ -412,6 +412,7 @@ function buildUrlFromCode(code) {
     return hieroglyphicSource +"/"+ code + ".svg";
 }
 
+
 MdcTreeWalker.prototype.visit = function (tree) {
     if (!tree.type)
         return;

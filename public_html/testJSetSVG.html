@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Essais mise en page HTML/JS pour hiéroglyphes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Essais bruts de mise en page</h1>
+
+        <p> Deux tâches différents: a) rendre 
+            <img src="images/glyphs/Y5.svg" alt=""/>
+            <img src="images/glyphs/N35.svg" alt=""/>
+            <img src="images/glyphs/W24.svg" alt=""/> 
+            et b) rendre             
+            <img src="images/glyphs/G25.svg" alt=""/>
+            <img src="images/glyphs/Aa1.svg" alt=""/>            
+        </p>
+
+        <h2>Essai 1</h2>
+        <div id="mnw"></div>
+
+        <script>
+            var toRenderMnw = {type: 'v', content: [
+                    {type: 'h', content: [{type: 's', code: 'Y5'}]},
+                    {type: 'h', content: [{type: 's', code: 'N35'}]},
+                    {type: 'h', content: [
+                            {type: 's', code: 'W24'},
+                            {type: 's', code: 'W24'},
+                            {type: 's', code: 'W24'}]
+                    }
+                ]};
+
+            function signSize(code) {
+                return new Promise(function (resolve, reject) {
+                    var elt = document.createElement("img");
+                    elt.onload = function () {
+                        resolve(
+                                {
+                                    code: code,
+                                    width: elt.naturalWidth,
+                                    height: elt.naturalHeight
+                                });
+                    };
+                    elt.src = "images/glyphs/" + code + ".svg";
+                });
+            }
+
+            var signInfo = {};
+
+            function prepareAllSigns() {
+                all = ["A1", "Y5", "W24", "N35", "G25", "Aa1"];
+                return Promise.all(all.map(s => signSize(s)))
+                        .then(info => {
+                            info.forEach(s => {
+                                signInfo[s.code] = s;
+                            })
+                            return signInfo;
+                        });
+            }
+
+            function layoutAllGlyphs(signInfo) {
+                layoutElt(signInfo, document.getElementById("mnw"), toRenderMnw);
+            }
+
+            function layoutElt(signInfo, elt, group) {
+                var expectedSize = signInfo["A1"].height;
+
+                function computeOriginalSize(g) {
+                    switch (g.type) {
+                        case 'v':
+                            {
+                                g.content.forEach(child => computeOriginalSize(child));
+                                g.original = {width: g.content.reduce(
+                                            (res, child) =>
+                                        res < child.original.width ? child.original.width : res
+                                    ,
+                                            0
+                                            ),
+                                    height: g.content.reduce(
+                                            (res, child) =>
+                                        res + child.original.height
+                                    ,
+                                            0
+                                            )
+                                }
+                            }
+                            break;
+
+                        case 'h':
+                            {
+                                g.content.forEach(child => computeOriginalSize(child));
+                                g.original = {
+                                    width: g.content.reduce(
+                                            (res, child) =>
+                                        res + child.original.width
+                                    ,
+                                            0
+                                            ),
+                                    height: g.content.reduce(
+                                            (res, child) =>
+                                        res < child.original.height ? child.original.height : res
+                                    ,
+                                            0
+                                            )
+                                };
+                            }
+                            break;
+                        case 's':
+                            {
+                                g.original = {
+                                    width: signInfo[g.code].width,
+                                    height: signInfo[g.code].height
+                                };
+                            }
+                            break;
+                    }
+                }
+
+                /*
+                 * calcule l'échelle à appliquer pour que la largeur de 
+                 * l'éléments soit limitée par maxWidth.
+                 * Si maxWidth est 0, l'élément n'est pas réduit... mais son 
+                 * contenu l'est.
+                 */
+                function resizeHorizontally(g, maxWidth) {
+                    g.transform = {scale: 1, origin: {x: 0, y: 0}};
+                    switch (g.type) {
+                        case 'v':
+                            {
+                                // Ne rien faire avec le parent...
+                                g.content.forEach(
+                                        child => resizeHorizontally(child, expectedSize));
+                            }
+                            break;
+
+                        case 'h':
+                            {
+                                if (g.original.width > maxWidth) {
+                                    g.transform.scale = maxWidth / g.original.width;
+                                }
+                                g.content.forEach(child => resizeHorizontally(child, 0));
+                            }
+                            break;
+                        case 's':
+                            break;
+                    }
+                }
+
+                function doLayout(g, position) {
+                    var x = position.x;
+                    var y = position.y;
+                    switch (g.type) {
+                        case 'v':
+                            {
+                                for (var i = 0; i < g.content.length; i++) {
+                                    g.content[i].transform.origin = {x: x, y: y};
+                                    y += g.content[i].original.height *
+                                            g.content[i].transform.scale;
+                                    doLayout(g.content[i], {x: 0, y: 0});
+                                }
+                            }
+                            break;
+                        case 'h':
+                            {
+                                for (var i = 0; i < g.content.length; i++) {
+                                    g.content[i].transform.origin = {x: x, y: y};
+                                    x += g.content[i].original.width *
+                                            g.content[i].transform.scale;
+                                    doLayout(g.content[i], {x: 0, y: 0});
+                                }
+                            }
+                            break;
+                        case 's':
+                            {
+
+                            }
+                            break;
+                    }
+                }
+
+                function applyTransform(g, transform) {
+                    g.transform.scale = g.transform.scale * transform.scale;
+                    g.transform.origin.x = g.transform.origin.x * transform.scale;
+                    g.transform.origin.y = g.transform.origin.y * transform.scale;
+                    if (g.content) {
+                        for (var i = 0; i < g.content.length; i++) {
+                            applyTransform(g.content[i], g.transform)
+                        }
+                    }
+                }
+
+                // Alternative: utiliser style.transform= 
+                function createElements(g) {
+                    var newElement;
+                    switch (g.type) {
+                        case 'v':
+                            {                                
+                                var res = document.createElement("div");
+                                res.style.margin = "0em";
+                                res.style.padding = "0em";
+                                res.style.position = "relative"; // Ou absolue... à voir.
+                                res.style.width = (g.original.width * g.transform.scale) + "px";
+                                res.style.height = (g.original.height * g.transform.scale) + "px";
+                                for (var i = 0; i < g.content.length; i++) {
+                                    var childElt = createElements(g.content[i]);
+                                    res.appendChild(childElt);
+                                    childElt.style.border = "0.25px solid red";
+                                }
+                                return res;
+                            }
+                            break;
+                        case 'h':
+                            {
+                                var res = document.createElement("div");
+                                res.style.position = "absolute"; // Ou absolue... à voir.
+                                res.style.width = (g.original.width * g.transform.scale) + "px";
+                                res.style.height = (g.original.height * g.transform.scale) + "px";
+                                res.style.top = g.transform.origin.y + "px";
+                                res.style.left = g.transform.origin.x + "px";
+                                for (var i = 0; i < g.content.length; i++) {
+                                    var childElt = createElements(g.content[i]);
+                                    res.appendChild(childElt);
+                                }
+                                return res;
+                            }
+                            break;
+                        case 's':
+                            {
+                                var newElement = document.createElement("img");
+                                newElement.style.position = "absolute";
+                                newElement.style.top = g.transform.origin.y + "px";
+                                newElement.style.left = g.transform.origin.x + "px";
+                                newElement.src = "images/glyphs/" + g.code + ".svg";
+                                newElement.style.width = (g.original.width * g.transform.scale) + "px";
+                                newElement.style.height = "auto";
+                                return newElement;
+                            }
+                            break;
+                    }
+                }
+
+                computeOriginalSize(group);
+                resizeHorizontally(group, 0);
+
+                // resizeVertically(group, expectedSize);
+                doLayout(group, {x: 0, y: 0});
+                applyTransform(group, {scale: 1});
+
+                var rootElement = createElements(group);
+                elt.appendChild(rootElement);
+            }
+
+
+            prepareAllSigns().then(signInfo => {
+                layoutAllGlyphs(signInfo);
+            });
+
+
+
+        </script>
+
+
+
+    </body>
+</html>

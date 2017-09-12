@@ -1,5 +1,7 @@
 /* 
  * Library for basic manipulation of Manuel de Codage files.
+ * 
+ * Revised version, using SVG (or other ?) as output...
  */
 var hieroglyphicSource="images/glyphs";
 
@@ -422,6 +424,7 @@ MdcTreeWalker.prototype.visit = function (tree) {
             box.alt=val;
             box.src = buildUrlFromCode(val);
             this.result = box;
+            console.log("box.width" );
             break;
         case 'symbol':
             switch (tree.value) {
