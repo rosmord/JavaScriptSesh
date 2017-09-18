@@ -14,10 +14,10 @@
         <p> The sentence <span class="hieroglyphic-text">i-w-r:a-C1-m-p*t:pt</span> 
             means "Re is in the sky"</p>
 
-        
+
         <p> An example : <span class="hieroglyphic-text">i-n:n:n:n:n:n:n:n:n:n:n:n:n:n:n:n</span> 
             to show we are not afraid of tall groups.</p>
-        
+
         <p> We support only very simple Manuel de codage 
             Basically, you can write simple groups (with parenthesis),
             and also // for shaded parts,  [[ and ]] for lacunas, and ".." for spaces.
@@ -25,7 +25,7 @@
             <span class="hieroglyphic-text">A1-pA-x:r:xr-A1-[[-..-]]-n:(x:t)*U30-A1-xAst-//</span> 
             has code <code>pA-x:r:xr-[[-..-]]-n:(x:t)*U30-xAst-//</code></p>
 
-            <span class="hieroglyphic-text">I10:D46-M17-N35-T18-G43-A1-M17-N29:D21:Y1-G43-U28-G1-Y1-F34*Z1:V31A-F4:D36-A1-G17-D36:V31A-F22:D54-N35:N35:Z2-F26:N35-W24-G43-O1-O42:Q3-D36-Aa1:D21-Q3*Z7:M3</span> 
+        <span class="hieroglyphic-text">I10:D46-M17-N35-T18-G43-A1-M17-N29:D21:Y1-G43-U28-G1-Y1-F34*Z1:V31A-F4:D36-A1-G17-D36:V31A-F22:D54-N35:N35:Z2-F26:N35-W24-G43-O1-O42:Q3-D36-Aa1:D21-Q3*Z7:M3</span> 
 
         Use in a HTML Table:
         <table>
@@ -34,6 +34,20 @@
             <tr><td class="hieroglyphic-text">A2</td><td>A2</td></tr>
         </table>
 
+
+        <p>Ligatures are understood, but currently require precomposed groups 
+            to be saved in the SVG picture folder: 
+            <span class="hieroglyphic-text">D:d-D&amp;d</span>
+            <span class="hieroglyphic-text">t&amp;A-A&amp;x</span>.</p>
+
+        <p> Cartouches can be rendered too: <span class="hieroglyphic-text">zA-ra-<-mn-xpr-ra->-anx-DA-s</span>.</p>
+
+        <p>Group shading is available : <span class="hieroglyphic-text">p*t:pt#14</span>.</p>
+
+        <p>Multiline texts : <span class="hieroglyphic-text">m-Htp:t*p-!
+                m-Htp:t*p-! m-Htp:t*p-!</span>.</p>
+
+                <p> Red text : <span class="hieroglyphic-text">$r-I10:D46-M17-N35-$b-T18-G43-A1-M17-N29:D21:Y1-G43-U28-G1-Y1-F34*Z1:V31A-F4:D36-A1</span> </p>
 
         <p><em>JavascriptSesh parser built using PEGJS.</em></p>
 
