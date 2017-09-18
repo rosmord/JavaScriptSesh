@@ -26,6 +26,8 @@
             var toRender =
                     {type: 'l', content: [
                             {type: 'v', content: [
+                                    {type: 'h', content: [{type: 's', code: 'aAv'}]}]},
+                            {type: 'v', content: [
                                     {type: 'h', content: [{type: 's', code: 'A1'}]}]},
                             {type: 'v', content: [
                                     {type: 'h', content: [{type: 's', code: 'mn'}]},
@@ -49,6 +51,9 @@
                                     {type: 'h', content: [{type: 's', code: 'p'}]},
                                     {type: 'h', content: [{type: 's', code: 'n'}]},
                                     {type: 'h', content: [{type: 's', code: 'n'}]},
+                                    {type: 'h', content: [{type: 's', code: 'n'}]},                                    
+                                    {type: 'h', content: [{type: 's', code: 'n'}]},
+                                    {type: 'h', content: [{type: 's', code: 'n'}]},
                                     {type: 'h', content: [{type: 's', code: 'n'}]},
                                 ]},
                             {type: 'v', content: [
@@ -56,9 +61,9 @@
                                     {type: 'h', content: [{type: 's', code: 'x'}]},
                                 ]}
                         ]};
-                    
-                   
-            renderMdcObjectInto(toRender, document.getElementById("target"));
+
+                      
+            renderMdcObjectInto(toRender, document.getElementById("target"), {scale: 8});
         </script>
     </body>
 </html>

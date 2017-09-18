@@ -582,6 +582,11 @@ class LayoutRectangle {
 }
 
 
+/**
+ * Base class for layout.
+ * An object of this class will be attached to each group.
+ * @type type
+ */
 class LayoutDelegate {
     constructor(g, width, height) {
         this.group = g;
@@ -625,15 +630,14 @@ class LayoutDelegate {
     }
 
     getInnerGeometry() {
-        return this.inner;
+        return new SimpleRectangle(0, 0, this.inner.width, this.inner.height);
     }
 
     getOuterGeometry() {
         let w = this.inner.width * this.scale;
         let h = this.inner.height * this.scale;
-        return new LayoutRectangle(
-                new SimpleRectangle(this.origin.x,
-                        this.origin.y, w, h));
+        return new SimpleRectangle(this.origin.x,
+                this.origin.y, w, h);
     }
 
     /**
@@ -721,6 +725,20 @@ class LayoutDelegate {
         }
         this.pack();
     }
+
+    /*
+     * Changes spaces in elements so that they fill the available space.
+     * 
+     * @param {type} parentSize space available in the parent
+     * @returns {undefined}
+     */
+    fixSpacing(parentSize) {
+        if (this.group.content) {
+            this.group.content.forEach(c => c.layout.fixSpacing(this.getInnerGeometry()));
+        }
+        // Normally not needed.
+        // this.pack();
+    }
 }
 
 
@@ -755,6 +773,7 @@ class AbstractVerticalDelegate extends  LayoutDelegate {
             y: currentPos.y + geom.getHeight()
         };
     }
+
 }
 
 class LineDelegate extends AbstractHorizontalDelegate {
@@ -776,15 +795,39 @@ class HorizontalDelegate extends AbstractHorizontalDelegate {
         let dims = this.getOuterGeometry();
         let currentW = this.inner.width;
         if (currentW > maxW) {
-            let scale = maxW / this.getInnerGeometry().width;
+            let scale = maxW / this.getInnerGeometry().getWidth();
             this.setScale(scale);
         }
         this.pack();
         // now pack for parent to use the right size.
     }
+
+    fixSpacing(parentSize) {
+        super.fixSpacing(parentSize);
+        let parentWidth = parentSize.getWidth();
+        let myWidth = this.getOuterGeometry().getWidth();
+        if (parentWidth > myWidth && this.group.content) {
+            let spaces = this.group.content.filter(c => c.type === "space");
+            if (spaces.length > 0) {
+                let spaceWidth = (parentWidth - myWidth) / (this.scale * spaces.length);
+                spaces.forEach(sp => sp.layout.extraWidth = spaceWidth);
+            }
+            this.pack();
+        }
+    }
 }
 
 class SignDelegate extends LayoutDelegate {
+    constructor(g, width, height) {
+        super(g, width, height);
+    }
+
+    packElement(contentGeometry) {
+        // Inner size does not depend on children (ok, there are no children).
+    }
+}
+
+class SymbolDelegate extends LayoutDelegate {
     constructor(g, width, height) {
         super(g, width, height);
     }
@@ -801,34 +844,48 @@ class VerticalDelegate extends AbstractVerticalDelegate {
 
     resizeVertically(maxW, maxH) {
         if (this.group.content) {
-            this.group.content.forEach(c => c.layout.resizeHorizontally(maxW, maxH));
+            this.group.content.forEach(c => c.layout.resizeVertically(maxW, maxH));
         }        // now fix if needed.
         let currentH = this.inner.height;
         if (currentH > maxH) {
-            let scale = maxH / this.getInnerGeometry().height;
+            let scale = maxH / this.getInnerGeometry().getHeight();
             this.setScale(scale);
         }
         this.pack();
     }
+
+    fixSpacing(parentSize) {
+        super.fixSpacing(parentSize);
+        let parentHeight = parentSize.getHeight();
+        let myHeight = this.getOuterGeometry().getHeight();
+        if (parentHeight > myHeight && this.group.content) {
+            let spaces = this.group.content.filter(c => c.type === "space");
+            if (spaces.length > 0) {
+                let spaceHeight = (parentHeight - myHeight) / (this.scale * spaces.length);
+                spaces.forEach(sp => sp.layout.extraHeight = spaceHeight);
+            }
+            this.pack();
+        }
+    }
 }
-
-
 
 // reminder : spaces:
 // {type: 'space', minW: 0, minH: 1, growW: 0, growH: 1};
 class SpaceDelegate extends LayoutDelegate {
     constructor(g) {
         super(g, 0, 0);
+        this.extraWidth = 0;
+        this.extraHeight = 0;
     }
 
     packElement(childrenGeometry) {
         let g = this.group;
-        this.inner = {
-            width: g.growW * g.minW,
-            height: g.growH * g.minH
-        };
+        this.inner.width = g.growW * g.minW + this.extraWidth;
+        this.inner.height = g.growH * g.minH + this.extraHeight;
     }
+    ;
 }
+
 
 
 function layoutFactory(glyphsInfo, g) {
@@ -845,12 +902,25 @@ function layoutFactory(glyphsInfo, g) {
                 info = {width: 0, height: 0};
             }
             return new SignDelegate(g, info.width, info.height);
+        case 'symbol':
+        switch (g.code) {
+            case "fullSpace":
+                return new SignDelegate(g, glyphsInfo["A1"].width, glyphsInfo["A1"].height);
+            case "halfSpace":
+                return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height / 2);
+            case "fullShade":
+                return new SignDelegate(g, glyphsInfo["A1"].width, glyphsInfo["A1"].height);
+            case "[":
+                return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height);
+            case "]":
+                return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height);
+        }
         case 'space':
             return new SpaceDelegate(g);
     }
 }
 
-function renderMdcObjectInto(mdcObject, targetElt) {
+function renderMdcObjectInto(mdcObject, targetElt, options) {
 
     /**
      * perform a certain operation on all signs in a mdcObject.
@@ -864,10 +934,12 @@ function renderMdcObjectInto(mdcObject, targetElt) {
                 f(m);
                 break;
             default:
-                m.content.forEach(
-                        (child) => doOnGlyphs(f, child));
+                if (m.content)
+                    m.content.forEach(
+                            (child) => doOnGlyphs(f, child));
         }
     }
+
 
     /**
      * Normalize all codes in a mdcObject by using Gardiner codes when possible.
@@ -938,8 +1010,8 @@ function renderMdcObjectInto(mdcObject, targetElt) {
      * @returns {unresolved} Unit
      */
     function layoutMdcGroup(glyphsInfo, mdcGroup) {
-        var maxQuadrantHeight = glyphsInfo["A1"].height;
-        var maxQuadrantWidth = glyphsInfo["A1"].width;
+        var maxQuadrantHeight = glyphsInfo["A1"].height * 1.001;
+        var maxQuadrantWidth = glyphsInfo["A1"].width * 1.3;
 
         /**
          * Recursively add basic layout information to g.
@@ -979,6 +1051,9 @@ function renderMdcObjectInto(mdcObject, targetElt) {
             function buildVSpace() {
                 return {type: 'space', minW: 0, minH: 1, growW: 0, growH: 1};
             }
+            function buildFillVSpace() {
+                return {type: 'space', minW: 0, minH: 0, growW: 0, growH: 1};
+            }
             // Setup
             // decide where spaces go
             // decide the type of spaces
@@ -998,9 +1073,9 @@ function renderMdcObjectInto(mdcObject, targetElt) {
                     break;
                 case 'v':
                     innerSpaceFactory = buildVSpace;
-                    outerSpaceFactory = buildVSpace;
+                    outerSpaceFactory = buildFillVSpace;
                     break;
-                case 's':
+                default:
                     break;
             }
             // b) decide about their positions
@@ -1009,13 +1084,26 @@ function renderMdcObjectInto(mdcObject, targetElt) {
                     // default is ok.
                     break;
                 case 'h':
-                case 'v': // (for v, not so obvious choice...)
+                    if (g.content.length === 1) {
+                        hasStartSpace = hasEndSpace = true; // center
+                        hasInnerSpace = false;
+                    } // else default is ok.
+                    break;
+                case 'v':
                     if (g.content.length === 1) {
                         hasStartSpace = hasEndSpace = true; // center
                         hasInnerSpace = false;
                     } // else default is ok.
                     break;
                 case 's':
+                    hasStartSpace = false;
+                    hasEndSpace = false;
+                    hasInnerSpace = false;
+                    break;
+                case 'symbol':
+                    hasStartSpace = hasEndSpace = false;
+                    hasInnerSpace = false;
+                default:
                     hasInnerSpace = false;
                     break;
             }
@@ -1043,11 +1131,10 @@ function renderMdcObjectInto(mdcObject, targetElt) {
         mdcGroup.layout.deepPack();
 
         mdcGroup.layout.resizeHorizontally(maxQuadrantWidth, maxQuadrantHeight);
-        
+
         mdcGroup.layout.resizeVertically(maxQuadrantWidth, maxQuadrantHeight);
 
-        //resizeVertically(mdcGroup, maxQuadrantHeight);
-        console.log(mdcGroup);
+        mdcGroup.layout.fixSpacing(mdcGroup.layout.getInnerGeometry());
         return mdcGroup;
     }
 
@@ -1057,6 +1144,7 @@ function renderMdcObjectInto(mdcObject, targetElt) {
      * @returns {undefined}
      */
     function createDisplay(g) {
+        console.log("ICI !!!!");
         const SVG_NS = "http://www.w3.org/2000/svg";
         const XLINK_NS = "http://www.w3.org/1999/xlink";
         // Auxiliary function for element creation.
@@ -1068,7 +1156,7 @@ function renderMdcObjectInto(mdcObject, targetElt) {
                     res.setAttributeNS(XLINK_NS, key, val);
                 } else if (key === "xmlns") {
                     res.setAttribute(key, val);
-                }else {
+                } else {
                     res.setAttributeNS(null, key, val);
                 }
             }
@@ -1077,11 +1165,12 @@ function renderMdcObjectInto(mdcObject, targetElt) {
 
 
         let globalGeom = g.layout.getOuterGeometry();
+
         const svgRoot = createElement("svg", {
-            viewBox: "0 0 "+ (globalGeom.getWidth() + 2) + " "+ (globalGeom.getHeight() + 2),
-            width: (globalGeom.getWidth() + 2),
-            height: "auto",
-            xmlns:  SVG_NS
+            viewBox: "0 0 " + (globalGeom.getWidth() + 2) + " " + (globalGeom.getHeight() + 2),
+            width: (globalGeom.getWidth() + 2) * globalScale,
+            height: (globalGeom.getHeight() + 2) * globalScale,
+            xmlns: SVG_NS
         });
         /**
          * Perform a transformation.
@@ -1123,7 +1212,7 @@ function renderMdcObjectInto(mdcObject, targetElt) {
                     return null;
                 case 's':
                     {
-                        url = "images/glyphs/" + g.code + ".svg";                        
+                        url = "images/glyphs/" + g.code + ".svg";
                         // Note : in svg 1.1, width and height are mandatory.
                         // in svg 1.2, not. 
                         // Chrome can work without width and height, not safari 
@@ -1135,13 +1224,53 @@ function renderMdcObjectInto(mdcObject, targetElt) {
                         });
                     }
                     break;
+                case "symbol":
+                    switch (g.code) {
+                        case "[":
+                            points = [g.layout.inner.width - 1, 1,
+                                1, 1,
+                                1, g.layout.inner.height - 1,
+                                g.layout.inner.width - 1, g.layout.inner.height - 1
+                            ];
+                            res = createElement("polyline", {
+                                points: points.join(" "),
+                                width: g.layout.inner.width,
+                                height: g.layout.inner.height,
+                                style: "fill: none;stroke:black;stroke-width:1"
+                            });
+                            break;
+                        case "]":
+                            points = [1,1,g.layout.inner.width - 1, 1,                                
+                                g.layout.inner.width - 1, g.layout.inner.height - 1,
+                                1, g.layout.inner.height - 1
+                            ];
+                            res = createElement("polyline", {
+                                points: points.join(" "),
+                                width: g.layout.inner.width,
+                                height: g.layout.inner.height,
+                                style: "fill: none;stroke:black;stroke-width:1"
+                            });
+                            break;
+                        case "fullShade":
+                            res = createElement("rect", {
+                                width: g.layout.inner.width,
+                                height: g.layout.inner.height,
+                                style: "fill:rgb(100,100,100)"
+                            });
+                            break;
+                        default:
+                            return null;
+                    }
+                    break;
                 default:
                     {
                         var res = createElement("g", {});
-                        for (var i = 0; i < g.content.length; i++) {
-                            var childElt = createDisplayAux(g.content[i]);
-                            if (childElt)
-                                res.appendChild(childElt);
+                        if (g.content) {
+                            for (var i = 0; i < g.content.length; i++) {
+                                var childElt = createDisplayAux(g.content[i]);
+                                if (childElt)
+                                    res.appendChild(childElt);
+                            }
                         }
                     }
                     break;
@@ -1162,8 +1291,91 @@ function renderMdcObjectInto(mdcObject, targetElt) {
         targetElt.appendChild(svgRoot);
     }
 
+    if (options === undefined) {
+        options = {};
+    }
+    let globalScale = parseFloat(options["scale"] || "1");
     normalizeCodes(mdcObject);
     preloadGlyphs(extractGlyphsCodes(mdcObject)).then(
             glyphsInfo => layoutMdcGroup(glyphsInfo, mdcObject)
     ).then(decoratedObject => createDisplay(decoratedObject));
+}
+
+
+
+
+/**
+ * Parses a mdc String and returns a simple representation of its content.
+ * You need to import mdcParser.js first.
+ * @param {type} mdcString
+ * @returns {undefined} */
+
+function buildMDCObject(mdcString) {
+    // aux function used by most groups.
+    function buildGroup(type, tree) {
+        l = tree.content.map(c => buildMdc(c));
+        return {type: type, content: l};
+    }
+
+    function buildMdc(tree) {
+        if (!tree.type)
+            throw "missing code";
+        switch (tree.type) {
+            case 'text':
+                return buildGroup('l', tree);
+                break;
+            case "quadrant":
+                return buildGroup('v', tree);
+                break;
+            case "hbox":
+                return buildGroup('h', tree);
+                break;
+            case "subQuadrant":
+                return buildGroup('v', tree);
+                break;
+            case 'glyphCode':
+                var code = tree.value;
+                return {type: 's', code: code};
+                break;
+            case 'symbol':
+                switch (tree.value) {
+                    case '..':
+                        return {type: 'symbol', code: "fullSpace"};
+                        break;
+                    case '.':
+                        return {type: 'symbol', code: "halfSpace"};
+                        break;
+                    case '//':
+                        return {type: 'symbol', code: "fullShade"};
+                        break;
+                    case '[[':
+                        return {type: 'symbol', code: "["};
+                        break;
+                    case ']]':
+                        return {type: 'symbol', code: "]"};
+                        break;
+                    default:
+                        throw "unknown code";
+                }
+                break;
+            default:
+                throw "unknown code";
+        }
+    }
+    let r = mdcParser.parse(mdcString);
+    return buildMdc(r);
+}
+
+/*
+ * Replace the text content of an element (div for instance) 
+ * with the corresponding hieroglyphs.
+ * <p> Will mark element with an additional class, hieroglyphs-processed,
+ * which can be used to avoid processing the data twice.
+ * @param {Element} elt the HTML DOM element containing the text.
+ * @param {type} options
+ * @returns {undefined} */
+function replaceTextWithHieroglyphs(elt, options) {
+    let g = buildMDCObject(elt.textContent);
+    console.log(JSON.stringify(g));
+    renderMdcObjectInto(g, elt, options);
 }

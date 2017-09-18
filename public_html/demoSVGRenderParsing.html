@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+    <head>
+        <title>JavascriptSesh demo</title>
+
+        <script src="js/mdcParser.js"></script>
+        <script src="js/mdcUtilsTer.js"></script>
+    </head>
+    <body>
+        <h1>JavascriptSesh demo</h1>
+        This is a very simple demo of the use of Javascript JSesh. 
+        It's completely alpha software now.     
+
+        <p> The sentence <span class="hieroglyphic-text">i-w-r:a-C1-m-p*t:pt</span> 
+            means "Re is in the sky"</p>
+
+        
+        <p> An example : <span class="hieroglyphic-text">i-n:n:n:n:n:n:n:n:n:n:n:n:n:n:n:n</span> 
+            to show we are not afraid of tall groups.</p>
+        
+        <p> We support only very simple Manuel de codage 
+            Basically, you can write simple groups (with parenthesis),
+            and also // for shaded parts,  [[ and ]] for lacunas, and ".." for spaces.
+            Note that "-" are <em>mandatory</em> between groups.
+            <span class="hieroglyphic-text">A1-pA-x:r:xr-A1-[[-..-]]-n:(x:t)*U30-A1-xAst-//</span> 
+            has code <code>pA-x:r:xr-[[-..-]]-n:(x:t)*U30-xAst-//</code></p>
+
+            <span class="hieroglyphic-text">I10:D46-M17-N35-T18-G43-A1-M17-N29:D21:Y1-G43-U28-G1-Y1-F34*Z1:V31A-F4:D36-A1-G17-D36:V31A-F22:D54-N35:N35:Z2-F26:N35-W24-G43-O1-O42:Q3-D36-Aa1:D21-Q3*Z7:M3</span> 
+
+        Use in a HTML Table:
+        <table>
+            <tr><th>Sign</th><th>code</th></tr>
+            <tr><td class="hieroglyphic-text">A1</td><td>A1</td></tr>
+            <tr><td class="hieroglyphic-text">A2</td><td>A2</td></tr>
+        </table>
+
+
+        <p><em>JavascriptSesh parser built using PEGJS.</em></p>
+
+
+
+        <!-- 
+                The following Javascript code will search for all elements with class .hieroglyphic-text,
+                consider their content as Manuel de codage, and replace it with the proper hieroglyphic text.
+        -->
+        <script>
+            function replaceAllGlyphs() {
+                document.querySelectorAll(".hieroglyphic-text").forEach(
+                        function (elt) {
+                            try {
+                                replaceTextWithHieroglyphs(elt, {scale: 1.5});
+                            } catch (e) {
+                                console.log(e);
+                            }
+                        }
+                );
+            }
+            replaceAllGlyphs();
+        </script>
+    </body>
+</html>
