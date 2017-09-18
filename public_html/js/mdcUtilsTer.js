@@ -600,7 +600,7 @@ class LayoutDelegate {
      * @returns {unresolved}
      */
     getGroup() {
-        return g;
+        return this.group;
     }
 
     /**
@@ -827,6 +827,16 @@ class SignDelegate extends LayoutDelegate {
     }
 }
 
+class LigatureDelegate extends LayoutDelegate {
+    constructor(g, width, height) {
+        super(g, width, height);
+    }
+
+    packElement(contentGeometry) {
+        // Inner size does not depend on children (ok, there are no children).
+    }
+}
+
 class SymbolDelegate extends LayoutDelegate {
     constructor(g, width, height) {
         super(g, width, height);
@@ -923,6 +933,29 @@ function layoutFactory(glyphsInfo, g) {
 function renderMdcObjectInto(mdcObject, targetElt, options) {
 
     /**
+     * Applies functions to the various elements in a mdcObject.
+     * The functions are stored in a map, which links the type of 
+     * the object to the function to call. 
+     * if the type is absent from the map, no function is called.
+     * If a function returns the string "prune", the children of the element
+     * won't be examined.
+     * @param {type} funcMap
+     * @param {type} mdcObject
+     * @returns {undefined}
+     */
+    function doOn(funcMap, mdcObject) {
+        toCall = funcMap[mdcObject.type];
+        if (toCall) {
+            prune= toCall(mdcObject);
+        }
+        if (prune !== "prune" && mdcObject.content) {
+            mdcObject.content.forEach(
+                    (child) => doOn(funcMap, child));
+
+        }
+    }
+
+    /**
      * perform a certain operation on all signs in a mdcObject.
      * @param {type} f the function to call (mdcObject => Unit)
      * @param {type} m the mdcObject.
@@ -930,6 +963,8 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
      */
     function doOnGlyphs(f, m) {
         switch (m.type) {
+            case 'lig':
+                break;
             case 's':
                 f(m);
                 break;
@@ -950,8 +985,8 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
         function toGardiner(sign) {
             sign.code = phoneticCodesMap[sign.code] || sign.code;
         }
-        ;
-        return doOnGlyphs(toGardiner, mdcObject);
+        
+        return doOn({'s': toGardiner }, mdcObject);
     }
 
     /**
@@ -1240,7 +1275,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                             });
                             break;
                         case "]":
-                            points = [1,1,g.layout.inner.width - 1, 1,                                
+                            points = [1, 1, g.layout.inner.width - 1, 1,
                                 g.layout.inner.width - 1, g.layout.inner.height - 1,
                                 1, g.layout.inner.height - 1
                             ];
@@ -1337,6 +1372,11 @@ function buildMDCObject(mdcString) {
                 var code = tree.value;
                 return {type: 's', code: code};
                 break;
+            case 'ligature':
+                return {
+                    type: 'lig',
+                    content: tree.content.map(c => buildMdc(c))
+                };
             case 'symbol':
                 switch (tree.value) {
                     case '..':

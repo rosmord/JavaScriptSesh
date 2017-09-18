@@ -12,22 +12,46 @@
 start
   = text
 
-text=
-    h:quadrant t:("-" quadrant)* {return {type: "text", content: createList(h,t)}} / {return {type: "text", content: []}} 
+text= h:textItem t:(sep textItem)* {return {type: "text", content: createList(h,t)}} / EOF {return {type: "text", content: []}} 
 
-quadrant = h1:hbox h2:(":" hbox)* {return {type: "quadrant", content: createList(h1,h2)}}
+textItem= quadrant / skip / trigger
+
+quadrant = h1:hbox h2:(":" hbox)* shading? {return {type: "quadrant", content: createList(h1,h2)}}
+
+shading = "#" "1"? "2"? "3"? "4"?
 
 hbox
   = u1:unitBox u2:("*" unitBox)* {return {type: "hbox", content: createList(u1,u2)}}
 
-unitBox= sign /
+unitBox= ligature / sign /  box /
   "(" t:text ")" {return {type: "subQuadrant", content: t.content}}
 
+box = BSTART t:text BEND {return {type: "box", content: t.content}}
+
+ligature = 
+	s1:sign s2:("&" sign)+ {return {type: "ligature", content: createList(s1,s2)}}
+
+BSTART = "<-"
+
+BEND = "->"
+
+skip= "!"SPACE* {return {type: "skip", scope: "line"}}
 
 sign "sign"= 
-  glyphCode:$([a-zA-Z0-9@]+)
+  glyphCode:$([a-zA-Z0-9@]+) [ _\n\r]*
          {return {type: "glyphCode", value: glyphCode}}
   / symbol: $("[["/"]]"/".."/"."/"//") {return {type: "symbol", value: symbol}}
+
+trigger =
+	"$r" {return {type: "trigger", subType: "color", value:"red"}}
+    / "$b" {return {type: "trigger", subType: "color", value:"black"}}
+    
+EOF
+  = !.
+
+sep='-'/SPACE*
+
+SPACE= ' '/'\n'/'\t'/'\r' {}
 
 
 
