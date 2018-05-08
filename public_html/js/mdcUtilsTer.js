@@ -9,12 +9,16 @@
  * TODO : improve structure to embed everything nicely in a 
  * minimal number of functions...
  * 
+ * TODO : fix what happens when elements which "don't want" to be resized
+ * appear in a 'v' element. For instance, it's the case of cartouches.
+ * 
  * Detail of processing:
  * A) treewalkers builds a specific objet representation of the text.
  * B) This representation is transformed into an element.
  */
 
 var hieroglyphicSource = "images/glyphs";
+
 var MDC_PREFERENCES = {
     smallHSpace: 2,
     smallVSpace: 2
@@ -475,7 +479,7 @@ var glyphsInfo = {};
 //*******************************************************************
 
 /**
- * A basic rectangle.
+ * A basic rectangle, used in computations.
  * @type type
  */
 class SimpleRectangle {
@@ -510,6 +514,7 @@ class SimpleRectangle {
         return this.maxY - this.minY;
     }
 }
+
 /**
  * A representation of a rectangular zone which can be extended by adding elements.
  * The zone can also be empty, in which case it has no coordinates at all.
@@ -590,9 +595,9 @@ class LayoutRectangle {
 class LayoutDelegate {
     constructor(g, width, height) {
         this.group = g;
-        this.inner = {width: width, height: height};
+        this.inner = { width: width, height: height };
         this.scale = 1.0;
-        this.origin = {x: 0, y: 0};
+        this.origin = { x: 0, y: 0 };
     }
 
     /**
@@ -613,7 +618,7 @@ class LayoutDelegate {
     }
 
     setOrigin(x, y) {
-        this.origin = {x: x, y: y};
+        this.origin = { x: x, y: y };
     }
 
     /**
@@ -637,7 +642,7 @@ class LayoutDelegate {
         let w = this.inner.width * this.scale;
         let h = this.inner.height * this.scale;
         return new SimpleRectangle(this.origin.x,
-                this.origin.y, w, h);
+            this.origin.y, w, h);
     }
 
     /**
@@ -646,7 +651,7 @@ class LayoutDelegate {
      * @returns {LayoutDelegate.nullFirstPos.mdcUtilsTerAnonym$12}
      */
     firstPos() {
-        return {x: 0, y: 0};
+        return { x: 0, y: 0 };
     }
 
     nextPos(currentPos, i) {
@@ -668,8 +673,7 @@ class LayoutDelegate {
      * update the layout information for this element  according 
      * to its current transform (i.e. scale) and its children content.
      * 
-     * Does not pack the children. This method can be called after some modifications
-     * on an element to update its packing.
+     * Normally, one would redefine packElement instead of this method.
      * @returns {undefined}
      */
     pack() {
@@ -693,6 +697,10 @@ class LayoutDelegate {
         this.packElement(contentR);
     }
 
+    /**
+     * Packs the current element, knowing the size of its content.
+     * @param {LayoutRectangle} childrenGeometry a description of the space needed for the children.
+     */
     packElement(childrenGeometry) {
         this.inner = {
             width: childrenGeometry.getWidth(),
@@ -743,7 +751,7 @@ class LayoutDelegate {
 
 
 
-class AbstractHorizontalDelegate extends  LayoutDelegate {
+class AbstractHorizontalDelegate extends LayoutDelegate {
 
     constructor(g, width, height) {
         super(g, width, height);
@@ -760,7 +768,7 @@ class AbstractHorizontalDelegate extends  LayoutDelegate {
 
 }
 
-class AbstractVerticalDelegate extends  LayoutDelegate {
+class AbstractVerticalDelegate extends LayoutDelegate {
     constructor(g, width, height) {
         super(g, width, height);
     }
@@ -780,6 +788,28 @@ class LineDelegate extends AbstractHorizontalDelegate {
     constructor(g) {
         super(g, 0, 0);
     }
+}
+
+class CartoucheDelegate extends AbstractHorizontalDelegate {
+    constructor(g) {
+        super(g, 0, 0);
+    }
+
+    resizeHorizontally(maxW, maxH) {
+        // NO-OP
+    }
+
+    // Note : NoHScale is a property which is inherited 
+    // by the element's ANCESTORS.
+
+    packElement(childrenGeometry) {
+        this.inner= {
+            noHScale: true,
+            width: childrenGeometry.getWidth(),
+            height: childrenGeometry.getHeight()
+        }
+    }
+
 }
 
 
@@ -906,25 +936,33 @@ function layoutFactory(glyphsInfo, g) {
             return new LineDelegate(g);
         case 'h':
             return new HorizontalDelegate(g);
+        case 'cartouche':
+            return new CartoucheDelegate(g);
         case 's':
             var info = glyphsInfo[g.code];
             if (info === undefined) {
-                info = {width: 0, height: 0};
+                info = { width: 0, height: 0 };
             }
             return new SignDelegate(g, info.width, info.height);
+        case 'lig':
+            var info = glyphsInfo[g.aux.code];
+            if (info === undefined) {
+                info = { width: 0, height: 0 };
+            }
+            return new LigatureDelegate(g, info.width, info.height);
         case 'symbol':
-        switch (g.code) {
-            case "fullSpace":
-                return new SignDelegate(g, glyphsInfo["A1"].width, glyphsInfo["A1"].height);
-            case "halfSpace":
-                return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height / 2);
-            case "fullShade":
-                return new SignDelegate(g, glyphsInfo["A1"].width, glyphsInfo["A1"].height);
-            case "[":
-                return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height);
-            case "]":
-                return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height);
-        }
+            switch (g.code) {
+                case "fullSpace":
+                    return new SignDelegate(g, glyphsInfo["A1"].width, glyphsInfo["A1"].height);
+                case "halfSpace":
+                    return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height / 2);
+                case "fullShade":
+                    return new SignDelegate(g, glyphsInfo["A1"].width, glyphsInfo["A1"].height);
+                case "[":
+                    return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height);
+                case "]":
+                    return new SignDelegate(g, glyphsInfo["A1"].width / 2, glyphsInfo["A1"].height);
+            }
         case 'space':
             return new SpaceDelegate(g);
     }
@@ -944,13 +982,14 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
      * @returns {undefined}
      */
     function doOn(funcMap, mdcObject) {
+        let prune = undefined;
         toCall = funcMap[mdcObject.type];
         if (toCall) {
-            prune= toCall(mdcObject);
+            prune = toCall(mdcObject);
         }
         if (prune !== "prune" && mdcObject.content) {
             mdcObject.content.forEach(
-                    (child) => doOn(funcMap, child));
+                (child) => doOn(funcMap, child));
 
         }
     }
@@ -971,7 +1010,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
             default:
                 if (m.content)
                     m.content.forEach(
-                            (child) => doOnGlyphs(f, child));
+                        (child) => doOnGlyphs(f, child));
         }
     }
 
@@ -985,8 +1024,18 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
         function toGardiner(sign) {
             sign.code = phoneticCodesMap[sign.code] || sign.code;
         }
-        
-        return doOn({'s': toGardiner }, mdcObject);
+
+        // TODO : create 
+        function normalizeLig(lig) {
+            lig.aux = {
+                code: lig.signs.map(s =>
+                    phoneticCodesMap[s.code] || s.code
+                ).join("_")
+            };
+            console.log(lig);
+        }
+
+        return doOn({ 's': toGardiner, 'lig': normalizeLig }, mdcObject);
     }
 
     /**
@@ -995,11 +1044,13 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
      * @returns {Array} an array of codes (strings)
      */
     function extractGlyphsCodes(mdcObject) {
-        var codes = {A1: true};
-        doOnGlyphs(
-                (m) => codes[m.code] = true,
-                mdcObject
-                );
+        var codes = { A1: true };
+        doOn({
+            's': (m) => codes[m.code] = true,
+            'lig': (l) => { codes[l.aux.code] = true; return 'prune'; }
+        },
+            mdcObject
+        );
         return Object.keys(codes);
     }
 
@@ -1018,23 +1069,23 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                     var elt = document.createElement("img");
                     elt.onload = function () {
                         resolve(
-                                {
-                                    code: code,
-                                    width: elt.naturalWidth,
-                                    height: elt.naturalHeight
-                                });
+                            {
+                                code: code,
+                                width: elt.naturalWidth,
+                                height: elt.naturalHeight
+                            });
                     };
-                    elt.src = "images/glyphs/" + code + ".svg";
+                    elt.src = hieroglyphicSource+ "/" + code + ".svg";
                 });
             }
         }
         return Promise.all(codes.map(s => signSize(s)))
-                .then(info => {
-                    info.forEach(s => {
-                        glyphsInfo[s.code] = s;
-                    });
-                    return glyphsInfo;
+            .then(info => {
+                info.forEach(s => {
+                    glyphsInfo[s.code] = s;
                 });
+                return glyphsInfo;
+            });
     }
 
     /**
@@ -1081,13 +1132,13 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
             // (well, we might try to share spaces in a given environment, 
             // but it would be too tricky in the long run).            
             function buildHSpace() {
-                return {type: 'space', minW: 1, minH: 0, growW: 1, growH: 0};
+                return { type: 'space', minW: 1, minH: 0, growW: 1, growH: 0 };
             }
             function buildVSpace() {
-                return {type: 'space', minW: 0, minH: 1, growW: 0, growH: 1};
+                return { type: 'space', minW: 0, minH: 1, growW: 0, growH: 1 };
             }
             function buildFillVSpace() {
-                return {type: 'space', minW: 0, minH: 0, growW: 0, growH: 1};
+                return { type: 'space', minW: 0, minH: 0, growW: 0, growH: 1 };
             }
             // Setup
             // decide where spaces go
@@ -1245,9 +1296,18 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
             switch (g.type) {
                 case 'space':
                     return null;
+                case 'lig': {
+                    let url = hieroglyphicSource+ "/" + g.aux.code + ".svg";
+                    res = createElement("image", {
+                        href: url,
+                        width: g.layout.inner.width,
+                        height: g.layout.inner.height
+                    });
+                }
+                    break;
                 case 's':
                     {
-                        url = "images/glyphs/" + g.code + ".svg";
+                        let url = hieroglyphicSource+ "/" + g.code + ".svg";
                         // Note : in svg 1.1, width and height are mandatory.
                         // in svg 1.2, not. 
                         // Chrome can work without width and height, not safari 
@@ -1261,11 +1321,11 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                     break;
                 case "symbol":
                     switch (g.code) {
-                        case "[":
-                            points = [g.layout.inner.width - 1, 1,
+                        case "[": {
+                            let points = [g.layout.inner.width - 1, 1,
                                 1, 1,
                                 1, g.layout.inner.height - 1,
-                                g.layout.inner.width - 1, g.layout.inner.height - 1
+                            g.layout.inner.width - 1, g.layout.inner.height - 1
                             ];
                             res = createElement("polyline", {
                                 points: points.join(" "),
@@ -1273,9 +1333,10 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                                 height: g.layout.inner.height,
                                 style: "fill: none;stroke:black;stroke-width:1"
                             });
+                        }
                             break;
                         case "]":
-                            points = [1, 1, g.layout.inner.width - 1, 1,
+                            let points = [1, 1, g.layout.inner.width - 1, 1,
                                 g.layout.inner.width - 1, g.layout.inner.height - 1,
                                 1, g.layout.inner.height - 1
                             ];
@@ -1332,7 +1393,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
     let globalScale = parseFloat(options["scale"] || "1");
     normalizeCodes(mdcObject);
     preloadGlyphs(extractGlyphsCodes(mdcObject)).then(
-            glyphsInfo => layoutMdcGroup(glyphsInfo, mdcObject)
+        glyphsInfo => layoutMdcGroup(glyphsInfo, mdcObject)
     ).then(decoratedObject => createDisplay(decoratedObject));
 }
 
@@ -1342,14 +1403,15 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
 /**
  * Parses a mdc String and returns a simple representation of its content.
  * You need to import mdcParser.js first.
- * @param {type} mdcString
- * @returns {undefined} */
+ * @param {string} mdcString
+ * @returns {undefined}
+ **/
 
 function buildMDCObject(mdcString) {
     // aux function used by most groups.
     function buildGroup(type, tree) {
         l = tree.content.map(c => buildMdc(c));
-        return {type: type, content: l};
+        return { type: type, content: l };
     }
 
     function buildMdc(tree) {
@@ -1368,31 +1430,36 @@ function buildMDCObject(mdcString) {
             case "subQuadrant":
                 return buildGroup('v', tree);
                 break;
+            case 'box':
+                return buildGroup('cartouche', tree);
             case 'glyphCode':
                 var code = tree.value;
-                return {type: 's', code: code};
+                return { type: 's', code: code };
                 break;
             case 'ligature':
+                // Note: for 'ligature', we don't produce a content,
+                // as the children of the ligature are quite specific - and completely
+                // handled by the ligature itself.
                 return {
                     type: 'lig',
-                    content: tree.content.map(c => buildMdc(c))
+                    signs: tree.content.map(c => buildMdc(c))
                 };
             case 'symbol':
                 switch (tree.value) {
                     case '..':
-                        return {type: 'symbol', code: "fullSpace"};
+                        return { type: 'symbol', code: "fullSpace" };
                         break;
                     case '.':
-                        return {type: 'symbol', code: "halfSpace"};
+                        return { type: 'symbol', code: "halfSpace" };
                         break;
                     case '//':
-                        return {type: 'symbol', code: "fullShade"};
+                        return { type: 'symbol', code: "fullShade" };
                         break;
                     case '[[':
-                        return {type: 'symbol', code: "["};
+                        return { type: 'symbol', code: "[" };
                         break;
                     case ']]':
-                        return {type: 'symbol', code: "]"};
+                        return { type: 'symbol', code: "]" };
                         break;
                     default:
                         throw "unknown code";
