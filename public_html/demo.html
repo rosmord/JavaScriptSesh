@@ -9,8 +9,9 @@
     <body>      
         <h1>JavascriptSesh demo</h1>
         This is a very simple demo of the use of Javascript JSesh. 
-        It's completely alpha software now.     
-
+        It's completely alpha software now.
+        
+        
         <p> The sentence <span class="hieroglyphic-text">i-w-r:a-C1-m-p*t:pt</span> 
             means "Re is in the sky"</p>
 
@@ -52,6 +53,28 @@
         <p><em>JavascriptSesh parser built using PEGJS.</em></p>
 
 
+        <p>Other tests </p>
+        
+        <ul>
+            <li><span class="hieroglyphic-text">md-D-DbA:n-sw-w-G5-M-S17B-t:f-n:nm*(m*(t:t))-f-Hr-Z1-tA:Z1*N20-f-m-t-w-ti-A90</span>
+        </ul>
+        
+        <h2>Using this package alongside Markdown</h2>
+        
+        <p>I use this package with the Grav CMS, which uses the convenient Markdown
+            format.</p>
+        <p>Markdown is a easy text format, less cumbersome than HTML. To display 
+        markdown, however, you need to use a tool to transform it into HTML. In the Grav CMS,
+        this is done with ParseDown, which transforms (on the server side), Markdown into HTML
+        which is sent to the client.</p>
+       
+        <p>There might 
+            be some unwanted interactions between ParseDown and MdC code,
+            as '*' for instance is used by both 
+            formats. From my experience with ParseDown 
+            and the present format, you'd better escape "*" in the Manuel de Codage
+            format using "\". Thus you would encode "p\*t:pt" instead of "p*t:pt".            
+        </p>
 
         <!-- 
                 The following Javascript code will search for all elements with class .hieroglyphic-text,
