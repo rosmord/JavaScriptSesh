@@ -429,7 +429,7 @@ var glyphsInfo = {};
 //  attach to all MDC elements an *delegate* which will 
 //  be in charge of all layout processing.
 //  
-// This will allow us to use inheritance when it's usefull. 
+// This will allow us to use inheritance when it's useful. 
 // 
 // 
 // Vocabulary:
@@ -1358,18 +1358,35 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                             return null;
                     }
                     break;
+                    // In fact, we should have a much simpler rendering system : 
+                    // cartouches would add a kind of frame...
+                    case 'cartouche':
+                        var res = createElement("g", {});
+                        var frame = createElement("svg:path", {
+
+                            //width: g.layout.inner.width,
+                            //height: g.layout.inner.height,
+                            //d: "m 0,-3 " +  g.layout.inner.width + ", 0",
+                            d: "M 0,-4 H "+ g.layout.inner.width + 
+                                " c 10,0 10,"+ (g.layout.inner.height + 8) + " 0,"+(g.layout.inner.height + 8)+
+                                " h -"+ g.layout.inner.width+ " Z"                                
+                            ,
+                            style: "fill: none; color:#000000;stroke:#000000;stroke-width:1"
+                        });
+                        res.appendChild(frame);
+                        break;
                 default:
                     {
-                        var res = createElement("g", {});
-                        if (g.content) {
-                            for (var i = 0; i < g.content.length; i++) {
-                                var childElt = createDisplayAux(g.content[i]);
-                                if (childElt)
-                                    res.appendChild(childElt);
-                            }
-                        }
+                        var res = createElement("g", {});                       
                     }
                     break;
+            }
+            if (res && g.content) {
+                for (var i = 0; i < g.content.length; i++) {
+                    var childElt = createDisplayAux(g.content[i]);
+                    if (childElt)
+                        res.appendChild(childElt);
+                }
             }
             let origin = g.layout.getOrigin();
             translate(res, origin.x, origin.y);
