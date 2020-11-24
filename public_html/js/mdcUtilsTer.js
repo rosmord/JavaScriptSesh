@@ -1230,7 +1230,6 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
      * @returns {undefined}
      */
     function createDisplay(g) {
-        console.log("ICI !!!!");
         const SVG_NS = "http://www.w3.org/2000/svg";
         const XLINK_NS = "http://www.w3.org/1999/xlink";
         // Auxiliary function for element creation.
@@ -1284,7 +1283,28 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
         function scale(elt, scale) {
             doTransformAux(elt, base => base.setScale(scale, scale));
         }
+    
 
+        function drawCartoucheAround(group) {
+            
+            var frame = createElement("svg:path", {
+                //width: g.layout.inner.width,
+                //height: g.layout.inner.height,
+                //d: "m 0,-3 " +  g.layout.inner.width + ", 0",
+                d: "M 0,-4 h "+ group.layout.inner.width  // top horizontal line
+                    + " c 10,0 10,"+ (group.layout.inner.height + 8) + " 0,"+(group.layout.inner.height + 8)
+                    + " h -"+ group.layout.inner.width
+                    + " c -10, 0"+ " -10," + -(group.layout.inner.height + 8) + " 0,"+ -(group.layout.inner.height + 8)
+                    + " Z "
+                    + "M "+ (group.layout.inner.width+8) + ",-4"
+                    + " v "+ (group.layout.inner.height + 8)
+                ,
+                
+                   
+                style: "fill: none; color:#000000;stroke:#000000;stroke-width:1"
+            });
+            return frame;
+        }
 
         /**
          * Creates and return an element (or null if none is to be created).
@@ -1361,19 +1381,8 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                     // In fact, we should have a much simpler rendering system : 
                     // cartouches would add a kind of frame...
                     case 'cartouche':
-                        var res = createElement("g", {});
-                        var frame = createElement("svg:path", {
-
-                            //width: g.layout.inner.width,
-                            //height: g.layout.inner.height,
-                            //d: "m 0,-3 " +  g.layout.inner.width + ", 0",
-                            d: "M 0,-4 H "+ g.layout.inner.width + 
-                                " c 10,0 10,"+ (g.layout.inner.height + 8) + " 0,"+(g.layout.inner.height + 8)+
-                                " h -"+ g.layout.inner.width+ " Z"                                
-                            ,
-                            style: "fill: none; color:#000000;stroke:#000000;stroke-width:1"
-                        });
-                        res.appendChild(frame);
+                        var res = createElement("g", {});                       
+                        res.appendChild(drawCartoucheAround(g));
                         break;
                 default:
                     {
