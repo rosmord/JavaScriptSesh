@@ -2,9 +2,6 @@
 <html>
     <head>
         <title>JavascriptSesh demo</title>
-
-        <script src="js/mdcParser.js"></script>
-        <script src="js/mdcUtilsTer.js"></script>
     </head>
     <body>      
         <h1>JavascriptSesh demo</h1>
@@ -41,14 +38,15 @@
             <span class="hieroglyphic-text">t&amp;A-Ax&amp;x-zA&amp;ra</span>.</p>
 
         <p> Cartouches can be rendered too: 
-            <span class="hieroglyphic-text">zA&amp;ra-&lt;-M17-Y5:N35:N36-C2-F31-S29-M23-&gt;-anx-DA-s</span>.</p>
+            <span class="hieroglyphic-text">zA&amp;ra-&lt;-M17-Y5:N35:N36-C2-F31-S29-M23-&gt;-anx-DA-s</span>.
+            This being said, their scaling should change!
+        </p>
 
         <p>Group shading is available : <span class="hieroglyphic-text">p*t:pt#14</span>.</p>
 
-        <p>Multiline texts : <span class="hieroglyphic-text">m-Htp:t*p-!
-                m-Htp:t*p-! m-Htp:t*p-!</span>.</p>
+        <p>Multiline texts : <span class="hieroglyphic-text">m-Htp:t*p-!-m-Htp:t*p-!-m-Htp:t*p-!</span>.</p>
 
-                <p> Red text : <span class="hieroglyphic-text">$r-I10:D46-M17-N35-$b-T18-G43-A1-M17-N29:D21:Y1-G43-U28-G1-Y1-F34*Z1:V31A-F4:D36-A1</span> </p>
+        <p> Red text : <span class="hieroglyphic-text">$r-I10:D46-M17-N35-$b-T18-G43-A1-M17-N29:D21:Y1-G43-U28-G1-Y1-F34*Z1:V31A-F4:D36-A1</span> </p>
 
         <p><em>JavascriptSesh parser built using PEGJS.</em></p>
 
@@ -56,7 +54,8 @@
         <p>Other tests </p>
         
         <ul>
-            <li><span class="hieroglyphic-text">md-D-DbA:n-sw-w-G5-M-S17B-t:f-n:nm*(m*(t:t))-f-Hr-Z1-tA:Z1*N20-f-m-t-w-ti-A90</span>
+            <li>
+                <span class="hieroglyphic-text">md-D-DbA:n-sw-w-G5-M-S17B-t:f-n:nm*(m*(t:t))-f-Hr-Z1-tA:Z1*N20-f-m-t-w-ti-A90</span></li>
         </ul>
         
         <h2>Using this package alongside Markdown</h2>
@@ -76,23 +75,6 @@
             format using "\". Thus you would encode "p\*t:pt" instead of "p*t:pt".            
         </p>
 
-        <!-- 
-                The following Javascript code will search for all elements with class .hieroglyphic-text,
-                consider their content as Manuel de codage, and replace it with the proper hieroglyphic text.
-        -->
-        <script>
-            function replaceAllGlyphs() {
-                document.querySelectorAll(".hieroglyphic-text").forEach(
-                        function (elt) {
-                            try {
-                                replaceTextWithHieroglyphs(elt, {scale: 1.5});
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        }
-                );
-            }
-            replaceAllGlyphs();
-        </script>
+        <script type="module" src="/main.js"></script>   
     </body>
 </html>

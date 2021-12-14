@@ -17,12 +17,15 @@
  * B) This representation is transformed into an element.
  */
 
+import mdcParser from "./mdcParser.js" ;
+
 var hieroglyphicSource = "images/glyphs";
 
 var MDC_PREFERENCES = {
     smallHSpace: 2,
     smallVSpace: 2
 };
+
 var phoneticCodesMap = {
     "mSa": "A12",
     "xr": "A15",
@@ -983,7 +986,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
      */
     function doOn(funcMap, mdcObject) {
         let prune = undefined;
-        toCall = funcMap[mdcObject.type];
+        let toCall = funcMap[mdcObject.type];
         if (toCall) {
             prune = toCall(mdcObject);
         }
@@ -1194,7 +1197,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                     break;
             }
             if (hasInnerSpace && g.content.length > 1) {
-                oldContent = g.content;
+                let oldContent = g.content;
                 g.content = [oldContent[0]];
                 for (var i = 1; i < oldContent.length; i++) {
                     g.content.push(innerSpaceFactory());
@@ -1436,7 +1439,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
 function buildMDCObject(mdcString) {
     // aux function used by most groups.
     function buildGroup(type, tree) {
-        l = tree.content.map(c => buildMdc(c));
+        let l = tree.content.map(c => buildMdc(c));
         return { type: type, content: l };
     }
 
@@ -1488,13 +1491,14 @@ function buildMDCObject(mdcString) {
                         return { type: 'symbol', code: "]" };
                         break;
                     default:
-                        throw "unknown code";
+                        throw "unknown code "+ tree.value;
                 }
                 break;
             default:
-                throw "unknown code";
+                throw "unknown code "+tree.value;
         }
     }
+    //let r = mdcParser.parse(mdcString);
     let r = mdcParser.parse(mdcString);
     return buildMdc(r);
 }
@@ -1512,3 +1516,5 @@ function replaceTextWithHieroglyphs(elt, options) {
     console.log(JSON.stringify(g));
     renderMdcObjectInto(g, elt, options);
 }
+
+export {replaceTextWithHieroglyphs};
