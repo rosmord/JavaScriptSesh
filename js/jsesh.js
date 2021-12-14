@@ -32,8 +32,6 @@ var MDC_PREFERENCES = {
 
 let glyphsInfo = {};
 
-
-
 function renderMdcObjectInto(mdcObject, targetElt, options) {
 
     /**
@@ -141,7 +139,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                                 height: elt.naturalHeight
                             });
                     };
-                    elt.src = hieroglyphicSource+ "/" + code + ".svg";
+                    elt.src = hieroglyphicSource + "/" + code + ".svg";
                 });
             }
         }
@@ -314,7 +312,6 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
             return res;
         }
 
-
         let globalGeom = g.layout.getOuterGeometry();
 
         const svgRoot = createElement("svg", {
@@ -323,6 +320,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
             height: (globalGeom.getHeight() + 2) * globalScale,
             xmlns: SVG_NS
         });
+
         /**
          * Perform a transformation.
          * action is a function which takes an empty transform,
@@ -349,24 +347,23 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
         function scale(elt, scale) {
             doTransformAux(elt, base => base.setScale(scale, scale));
         }
-    
+
 
         function drawCartoucheAround(group) {
-            
+
             var frame = createElement("svg:path", {
                 //width: g.layout.inner.width,
                 //height: g.layout.inner.height,
                 //d: "m 0,-3 " +  g.layout.inner.width + ", 0",
-                d: "M 0,-4 h "+ group.layout.inner.width  // top horizontal line
-                    + " c 10,0 10,"+ (group.layout.inner.height + 8) + " 0,"+(group.layout.inner.height + 8)
-                    + " h -"+ group.layout.inner.width
-                    + " c -10, 0"+ " -10," + -(group.layout.inner.height + 8) + " 0,"+ -(group.layout.inner.height + 8)
+                d: "M 0,-4 h " + group.layout.inner.width  // top horizontal line
+                    + " c 10,0 10," + (group.layout.inner.height + 8) + " 0," + (group.layout.inner.height + 8)
+                    + " h -" + group.layout.inner.width
+                    + " c -10, 0" + " -10," + -(group.layout.inner.height + 8) + " 0," + -(group.layout.inner.height + 8)
                     + " Z "
-                    + "M "+ (group.layout.inner.width+8) + ",-4"
-                    + " v "+ (group.layout.inner.height + 8)
+                    + "M " + (group.layout.inner.width + 8) + ",-4"
+                    + " v " + (group.layout.inner.height + 8)
                 ,
-                
-                   
+
                 style: "fill: none; color:#000000;stroke:#000000;stroke-width:1"
             });
             return frame;
@@ -383,7 +380,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                 case 'space':
                     return null;
                 case 'lig': {
-                    let url = hieroglyphicSource+ "/" + g.aux.code + ".svg";
+                    let url = hieroglyphicSource + "/" + g.aux.code + ".svg";
                     res = createElement("image", {
                         href: url,
                         width: g.layout.inner.width,
@@ -393,7 +390,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                     break;
                 case 's':
                     {
-                        let url = hieroglyphicSource+ "/" + g.code + ".svg";
+                        let url = hieroglyphicSource + "/" + g.code + ".svg";
                         // Note : in svg 1.1, width and height are mandatory.
                         // in svg 1.2, not. 
                         // Chrome can work without width and height, not safari 
@@ -444,15 +441,15 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
                             return null;
                     }
                     break;
-                    // In fact, we should have a much simpler rendering system : 
-                    // cartouches would add a kind of frame...
-                    case 'cartouche':
-                        var res = createElement("g", {});                       
-                        res.appendChild(drawCartoucheAround(g));
-                        break;
+                // In fact, we should have a much simpler rendering system : 
+                // cartouches would add a kind of frame...
+                case 'cartouche':
+                    var res = createElement("g", {});
+                    res.appendChild(drawCartoucheAround(g));
+                    break;
                 default:
                     {
-                        var res = createElement("g", {});                       
+                        var res = createElement("g", {});
                     }
                     break;
             }
@@ -554,11 +551,11 @@ function buildMDCObject(mdcString) {
                         return { type: 'symbol', code: "]" };
                         break;
                     default:
-                        throw "unknown code "+ tree.value;
+                        throw "unknown code " + tree.value;
                 }
                 break;
             default:
-                throw "unknown code "+tree.value;
+                throw "unknown code " + tree.value;
         }
     }
     let r = mdcParser.parse(mdcString);
