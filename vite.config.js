@@ -9,7 +9,7 @@ export default defineConfig({
     lib: {
         entry: path.resolve(__dirname, 'js/jsesh.js'),
         name: 'my-small-library',
-        fileName: (format) => `my-small-library.${format}.js`,
+        fileName: (format) => `jsesh.${format}.js`,
       },
       /*
       rollupOptions: {
