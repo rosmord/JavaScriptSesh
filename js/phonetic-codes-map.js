@@ -1,3 +1,7 @@
+/**
+ * Mapping from standard Manuel de codage mnemonics to
+ * Gardiner codes.
+ */
 export const phoneticCodesMap = {
     "mSa": "A12",
     "xr": "A15",
