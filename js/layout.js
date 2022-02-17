@@ -1,3 +1,7 @@
+/**
+ * Classes dealing with glyphs layout.
+ * Not part of the public API.
+ */
 
 export {
     layoutFactory, LayoutDelegate

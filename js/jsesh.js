@@ -1,16 +1,5 @@
 /* 
- * Library for basic manipulation of Manuel de Codage files.
- * Improved MdC Utils.
- * 
- * Use a queue to load graphical elements.
- * 
- * SVG display with rescaling and the like.
- * 
- * TODO : improve structure to embed everything nicely in a 
- * minimal number of functions...
- * 
- * TODO : fix what happens when elements which "don't want" to be resized
- * appear in a 'v' element. For instance, it's the case of cartouches.
+ * Public API of the library for basic manipulation of Manuel de Codage files.
  * 
  * Detail of processing:
  * A) treewalkers builds a specific objet representation of the text.
@@ -27,8 +16,6 @@ var MDC_PREFERENCES = {
     smallHSpace: 2,
     smallVSpace: 2
 };
-
-
 
 let glyphsInfo = {};
 
