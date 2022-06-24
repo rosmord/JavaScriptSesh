@@ -8,7 +8,7 @@ export default defineConfig({
     // Creates a build target for libraries.
     lib: {
         entry: path.resolve(__dirname, 'js/jsesh.js'),
-        name: 'my-small-library',
+        name: 'jsesh-library',
         fileName: (format) => `jsesh.${format}.js`,
       },
       /*
