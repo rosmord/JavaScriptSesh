@@ -8,7 +8,7 @@
 
 import mdcParser from "./mdcParser.js";
 import { phoneticCodesMap } from "./phonetic-codes-map.js";
-import { layoutFactory } from "./layout.js";
+import { layoutFactory } from "./layout/layout.js";
 
 var hieroglyphicSource = "images/glyphs";
 

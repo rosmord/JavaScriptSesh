@@ -13,7 +13,7 @@ export default defineConfig({
       },
       /*
       rollupOptions: {
-        external: [], // visibility of the libraries used by the system
+        external: [], // external libraries, used by the demo and not by the Jsesh library.
         output: {
           // Provide global variables to use in the UMD build
           // Add external deps here
