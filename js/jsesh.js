@@ -10,6 +10,8 @@ import mdcParser from "./mdcParser.js";
 import { phoneticCodesMap } from "./phonetic-codes-map.js";
 import { layoutFactory } from "./layout/layout.js";
 
+export { replaceTextWithHieroglyphs };
+
 var hieroglyphicSource = "images/glyphs";
 
 var MDC_PREFERENCES = {
@@ -563,5 +565,4 @@ function replaceTextWithHieroglyphs(elt, options) {
     renderMdcObjectInto(g, elt, options);
 }
 
-export { replaceTextWithHieroglyphs };
 
