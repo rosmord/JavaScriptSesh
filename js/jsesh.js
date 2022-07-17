@@ -14,9 +14,9 @@ import { layoutFactory } from "./layout/layout.js";
 
 export { replaceTextWithHieroglyphs };
 
-var hieroglyphicSource = "images/glyphs";
+let hieroglyphicSource = "images/glyphs";
 
-var MDC_PREFERENCES = {
+let MDC_PREFERENCES = {
     smallHSpace: 2,
     smallVSpace: 2
 };
@@ -99,7 +99,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
      * @returns {Array} an array of codes (strings)
      */
     function extractGlyphsCodes(mdcObject) {
-        var codes = { A1: true };
+        let codes = {};
         doOn({
             's': (m) => codes[m.code] = true,
             'lig': (l) => { codes[l.aux.code] = true; return 'prune'; }
@@ -472,8 +472,11 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
     }
     let globalScale = parseFloat(options["scale"] || "1");
     normalizeCodes(mdcObject);
-    preloadGlyphs(extractGlyphsCodes(mdcObject)).then(
-        glyphsInfo => layoutMdcGroup(glyphsInfo, mdcObject)
+    let codeSet = extractGlyphsCodes(mdcObject)
+    codeSet.push("A1") // A1 must be known to compute line height. currently codeSet is a list...
+    console.log(codeSet)
+    preloadGlyphs(codeSet).then(
+        info => layoutMdcGroup(info, mdcObject)
     ).then(decoratedObject => createDisplay(decoratedObject));
 }
 
