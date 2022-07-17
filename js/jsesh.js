@@ -6,6 +6,8 @@
  * B) This representation is transformed into an element.
  */
 
+// TODO : make the following code into OO code.
+
 import mdcParser from "./mdcParser.js";
 import { phoneticCodesMap } from "./phonetic-codes-map.js";
 import { layoutFactory } from "./layout/layout.js";

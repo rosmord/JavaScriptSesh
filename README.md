@@ -3,14 +3,21 @@
 **JavascriptSesh** is a simple Javascript library for allowing web site
 creators to include hieroglyphic texts in their sites.
 
+## Purpose
+
+- (currently) provide a handy visualisation system for simple hieroglyphic texts
+- (future) cover the whole MdC as understood by JSesh
+- provide a base for a future JSesh version ? (I was thinking of *Kotlin*, but using Typescript might be a better target) ?
+- develop an JSON (or XML) alternative to the Manuel de Codage ; it will be easier to use for non-expert programmmers.
+
 It's not (yet) a replacement for JSesh (it will be less powerful for a
 while, and won't have copy/paste facilities for instance).
 
 A number of similar projects already exist (I know of one for the
-"[dedechampo]()" web site), and I am fully open to cooperation.
+"[ddchampo](https://ddchampo.com)" web site), and I am fully open to cooperation.
 
 This project might also be an occasion to provide a simpler version of
-the Manuel de Codage (maybe taking ideas from [RES]()), in order to have
+the Manuel de Codage (maybe taking ideas from [RES](https://mjn.host.cs.st-andrews.ac.uk/egyptian/res/)), in order to have
 something simple to parse.
 
 In this respect, it might also inspire the next version of the MdC

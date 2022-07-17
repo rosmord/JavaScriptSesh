@@ -4,7 +4,6 @@
 - externalize the fonts, and makes it easy to refer to them ;
 
 - Either use an existing SVG drawing library or write one for our needs (putting SVG drawPath textual commands "manually" is not a good solution at all)
-- Move to a modern Javascript infrastructure
 
 
 - TODO : improve structure to embed everything nicely in a   minimal number of functions...
