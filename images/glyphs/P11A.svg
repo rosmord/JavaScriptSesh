@@ -1,3 +1,3 @@
-<?xml version='1.0' encoding ='UTF-8' standalone='yes'?>
-<svg width='4.09' height='17.98' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' >
+<?xml version='1.0' encoding ='UTF-8' standalone='no'?>
+<svg width='4.09' height='17.98' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'  version='1.1' >
 <path style='fill:black; stroke:none' d=' M 0.6 0.38  L 0.6 3.14  L 0.97 3.14  Q 3.69 3.14 3.69 5.81  Q 3.69 8.46 0.97 8.46  L 0.6 8.46  L 0.6 17.6  L 0.38 17.6  L 0.38 8.26  Q 2.14 8.26 2.82 7.71  Q 3.49 7.16 3.49 5.81  Q 3.49 4.44 2.82 3.9  Q 2.14 3.36 0.38 3.36  L 0.38 0.38  Z  M 0 0  L 0 3.73  L 0.38 3.73  Q 1.68 3.73 2.39 4.09  Q 3.09 4.44 3.09 5.81  Q 3.09 7.18 2.39 7.52  Q 1.68 7.86 0.38 7.86  L 0 7.86  L 0 17.98  L 0.97 17.98  L 0.97 8.86  Q 2.58 8.86 3.33 8.04  Q 4.09 7.22 4.09 5.81  Q 4.09 4.4 3.33 3.58  Q 2.58 2.76 0.97 2.76  L 0.97 0  Z '/></svg>

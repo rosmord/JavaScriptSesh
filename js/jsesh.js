@@ -342,7 +342,7 @@ function renderMdcObjectInto(mdcObject, targetElt, options) {
 
         function drawCartoucheAround(group) {
 
-            var frame = createElement("svg:path", {
+            let frame = createElement("svg:path", {
                 //width: g.layout.inner.width,
                 //height: g.layout.inner.height,
                 //d: "m 0,-3 " +  g.layout.inner.width + ", 0",
