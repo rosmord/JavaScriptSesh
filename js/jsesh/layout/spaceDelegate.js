@@ -1,9 +1,9 @@
 // reminder : spaces:
 
-import layoutDelegate from "./layoutDelegate";
+import LayoutDelegate from "./layoutDelegate";
 
 // {type: 'space', minW: 0, minH: 1, growW: 0, growH: 1};
-export default class SpaceDelegate extends layoutDelegate {
+export default class SpaceDelegate extends LayoutDelegate {
     constructor(g) {
         super(g, 0, 0);
         this.extraWidth = 0;

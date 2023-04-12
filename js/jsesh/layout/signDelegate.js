@@ -1,6 +1,6 @@
-import layoutDelegate from "./layoutDelegate";
+import LayoutDelegate from "./layoutDelegate";
 
-export default class SignDelegate extends layoutDelegate {
+export default class SignDelegate extends LayoutDelegate {
     constructor(g, width, height) {
         super(g, width, height);
     }

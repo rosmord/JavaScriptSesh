@@ -6,15 +6,17 @@
  * B) This representation is transformed into an element.
  */
 
-// TODO : make the following code into OO code.
+import { phoneticCodesMap } from "./mdc/phonetic-codes-map.js";
+import { MDCModelBuilder } from "./mdc/mdcModelBuilder.js";
 
-import mdcParser from "./mdcParser.js";
-import { phoneticCodesMap } from "./data/phonetic-codes-map.js";
 import { layoutFactory } from "./layout/layout.js";
 
 export { JSeshRenderer };
 
 class JSeshRenderer {
+
+    #glyphsInfo
+    #mdcModelBuilder
     /**
      * Build a new JSesh renderer.
      */
@@ -24,13 +26,14 @@ class JSeshRenderer {
             smallHSpace: 2,
             smallVSpace: 2
         };
-        this.glyphsInfo = {};
+        this.#glyphsInfo = {};
+        this.#mdcModelBuilder = new MDCModelBuilder();
     }
 
 
     renderMdcObjectInto(mdcObject, targetElt, options) {
         // Change this (functionally oriented -> OO)
-        let glyphsInfo = this.glyphsInfo
+        let glyphsInfo = this.#glyphsInfo
         let hieroglyphicSource = this.hieroglyphicSource
 
         /**
@@ -44,7 +47,7 @@ class JSeshRenderer {
          * @param {type} mdcObject
          * @returns {undefined}
          */
-        function doOn(funcMap, mdcObject) {
+        function performOn(funcMap, mdcObject) {
             let prune = undefined;
             let toCall = funcMap[mdcObject.type];
             if (toCall) {
@@ -52,8 +55,7 @@ class JSeshRenderer {
             }
             if (prune !== "prune" && mdcObject.content) {
                 mdcObject.content.forEach(
-                    (child) => doOn(funcMap, child));
-
+                    (child) => performOn(funcMap, child));
             }
         }
 
@@ -63,7 +65,7 @@ class JSeshRenderer {
          * @param {type} m the mdcObject.
          * @returns {undefined}
          */
-        function doOnGlyphs(f, m) {
+        function performOnGlyphs(f, m) {
             switch (m.type) {
                 case 'lig':
                     break;
@@ -73,7 +75,7 @@ class JSeshRenderer {
                 default:
                     if (m.content)
                         m.content.forEach(
-                            (child) => doOnGlyphs(f, child));
+                            (child) => performOnGlyphs(f, child));
             }
         }
 
@@ -98,7 +100,7 @@ class JSeshRenderer {
                 console.log(lig);
             }
 
-            return doOn({ 's': toGardiner, 'lig': normalizeLig }, mdcObject);
+            return performOn({ 's': toGardiner, 'lig': normalizeLig }, mdcObject);
         }
 
         /**
@@ -108,7 +110,7 @@ class JSeshRenderer {
          */
         function extractGlyphsCodes(mdcObject) {
             let codes = {};
-            doOn({
+            performOn({
                 's': (m) => codes[m.code] = true,
                 'lig': (l) => { codes[l.aux.code] = true; return 'prune'; }
             },
@@ -488,81 +490,6 @@ class JSeshRenderer {
         ).then(decoratedObject => createDisplay(decoratedObject));
     }
 
-
-
-    /**
-     * Parses a mdc String and returns a simple representation of its content.
-     * You need to import mdcParser.js first.
-     * @param {string} mdcString
-     * @returns {undefined}
-     **/
-
-    buildMDCObject(mdcString) {
-        // aux function used by most groups.
-        function buildGroup(type, tree) {
-            let l = tree.content.map(c => buildMdc(c));
-            return { type: type, content: l };
-        }
-
-        function buildMdc(tree) {
-            if (!tree.type)
-                throw "missing code";
-            switch (tree.type) {
-                case 'text':
-                    return buildGroup('l', tree);
-                    break;
-                case "quadrant":
-                    return buildGroup('v', tree);
-                    break;
-                case "hbox":
-                    return buildGroup('h', tree);
-                    break;
-                case "subQuadrant":
-                    return buildGroup('v', tree);
-                    break;
-                case 'box':
-                    return buildGroup('cartouche', tree);
-                case 'glyphCode':
-                    var code = tree.value;
-                    return { type: 's', code: code };
-                    break;
-                case 'ligature':
-                    // Note: for 'ligature', we don't produce a content,
-                    // as the children of the ligature are quite specific - and completely
-                    // handled by the ligature itself.
-                    return {
-                        type: 'lig',
-                        signs: tree.content.map(c => buildMdc(c))
-                    };
-                case 'symbol':
-                    switch (tree.value) {
-                        case '..':
-                            return { type: 'symbol', code: "fullSpace" };
-                            break;
-                        case '.':
-                            return { type: 'symbol', code: "halfSpace" };
-                            break;
-                        case '//':
-                            return { type: 'symbol', code: "fullShade" };
-                            break;
-                        case '[[':
-                            return { type: 'symbol', code: "[" };
-                            break;
-                        case ']]':
-                            return { type: 'symbol', code: "]" };
-                            break;
-                        default:
-                            throw "unknown code " + tree.value;
-                    }
-                    break;
-                default:
-                    throw "unknown code " + tree.value;
-            }
-        }
-        let r = mdcParser.parse(mdcString);
-        return buildMdc(r);
-    }
-
     /*
      * Replace the text content of an element (div for instance) 
      * with the corresponding hieroglyphs.
@@ -572,7 +499,7 @@ class JSeshRenderer {
      * @param {type} options
      * @returns {undefined} */
     replaceTextWithHieroglyphs(elt, options) {
-        let g = this.buildMDCObject(elt.textContent);
+        let g = this.#mdcModelBuilder.buildMDCObject(elt.textContent);
         console.log(JSON.stringify(g));
         this.renderMdcObjectInto(g, elt, options);
     }

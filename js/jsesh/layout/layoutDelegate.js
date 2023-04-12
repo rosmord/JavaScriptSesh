@@ -4,9 +4,9 @@
  * @type type
  */
 
-import {LayoutRectangle, SimpleRectangle} from './shapes'
+import {LayoutRectangle, SimpleRectangle} from '../geometry/shapes'
 
- export default class layoutDelegate {
+ export default class LayoutDelegate {
     constructor(g, width, height) {
         this.group = g;
         this.inner = { width: width, height: height };

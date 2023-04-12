@@ -1,6 +1,6 @@
-import layoutDelegate from "./layoutDelegate";
+import LayoutDelegate from "./layoutDelegate";
 
-export default class LigatureDelegate extends layoutDelegate {
+export default class LigatureDelegate extends LayoutDelegate {
     constructor(g, width, height) {
         super(g, width, height);
     }
