@@ -9,10 +9,19 @@
 // TODO : make the following code into OO code.
 
 import mdcParser from "./mdcParser.js";
-import { phoneticCodesMap } from "./phonetic-codes-map.js";
+import { phoneticCodesMap } from "./data/phonetic-codes-map.js";
 import { layoutFactory } from "./layout/layout.js";
 
 export { replaceTextWithHieroglyphs };
+
+class JSeshRenderer {
+    /**
+     * Build a new JSesh renderer.
+     */
+    constructor(prefs) {
+        
+    }
+}
 
 let hieroglyphicSource = "images/glyphs";
 

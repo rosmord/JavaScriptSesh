@@ -3,7 +3,7 @@
     consider their content as Manuel de codage, and replace it with the proper hieroglyphic text.
 */
 
-import { replaceTextWithHieroglyphs } from "./js/jsesh";
+import { replaceTextWithHieroglyphs } from "./js/jsesh/jsesh";
 
 function replaceAllGlyphs() {
     document.querySelectorAll(".hieroglyphic-text").forEach(

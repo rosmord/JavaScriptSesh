@@ -4,7 +4,7 @@
  * @type type
  */
 
-import {LayoutRectangle, SimpleRectangle} from '../../js/shapes'
+import {LayoutRectangle, SimpleRectangle} from './shapes'
 
  export default class layoutDelegate {
     constructor(g, width, height) {
