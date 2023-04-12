@@ -3,13 +3,15 @@
     consider their content as Manuel de codage, and replace it with the proper hieroglyphic text.
 */
 
-import { replaceTextWithHieroglyphs } from "./js/jsesh/jsesh";
+import { JSeshRenderer } from "./js/jsesh/jsesh";
+
+const jseshRenderer = new JSeshRenderer()
 
 function replaceAllGlyphs() {
     document.querySelectorAll(".hieroglyphic-text").forEach(
         function (elt) {
             try {
-                replaceTextWithHieroglyphs(elt, { scale: 1.5 });
+                jseshRenderer.replaceTextWithHieroglyphs(elt, { scale: 1.5 });
             } catch (e) {
                 console.log(e);
             }
