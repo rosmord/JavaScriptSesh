@@ -79,3 +79,8 @@ A solution, which will work on recent browsers, is to use MutationObserver. The 
 
 
 
+## log
+
+2026-06-26
+: updated **vite** version (>= 8.1.0). Now using node 26.2.0 and npm 11.13.
+

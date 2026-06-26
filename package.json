@@ -11,10 +11,9 @@
   "author": "Serge Rosmorduc",
   "description": "a Javascript port of JSesh",
   "contributors": [],
-  "dependencies": {},
   "exports": {
-    "import": "./dist/jsesh.js",
-    "require": "./dist/jsesh-umd.js"
+    "import": "./dist/jsesh.es.js",
+    "require": "./dist/jsesh.umd.js"
   },
   "scripts": {
     "dev": "vite",
@@ -22,6 +21,6 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^2.7.2"
+    "vite": "^8.1.0"
   }
 }
